@@ -1,64 +1,214 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../theme/app_colors.dart';
 
 class AboutVRoutePage extends StatelessWidget {
   const AboutVRoutePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark    = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? AppColors.darkText : AppColors.lightText;
+    final subColor  = isDark ? AppColors.darkSubtext : AppColors.lightSubtext;
+    final accent    = isDark ? AppColors.teal : AppColors.tealDark;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF578E7E),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text('About VRoute'),
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(gradient: isDark ? AppColors.darkBg : AppColors.lightBg),
+            child: const SizedBox.expand(),
+          ),
+          CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 260,
+                pinned: true,
+                backgroundColor: Colors.transparent,
+                leading: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.black.withValues(alpha: 0.35),
+                    ),
+                    child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                  ),
+                ),
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset('assets/about_vroute_image.png', fit: BoxFit.cover),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.7),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 20, left: 20, right: 20,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('VRoute', style: GoogleFonts.poppins(
+                              fontSize: 30, fontWeight: FontWeight.w700, color: Colors.white,
+                            )),
+                            Text('Your campus, explored.', style: GoogleFonts.inter(
+                              fontSize: 13, color: Colors.white70,
+                            )),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 48),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _chip('Campus Guide · AR Experience · Community', accent),
+                      const SizedBox(height: 20),
+                      _infoCard(
+                        isDark, textColor, subColor,
+                        'What is VRoute?',
+                        'VRoute is designed to provide an interactive experience for university students and visitors. '
+                        'It offers detailed information about the university, its facilities, and AR experiences to navigate '
+                        'and explore the campus more efficiently. With features like puzzles and interactive AR views, '
+                        'VRoute ensures that every user has a unique and enjoyable journey within the campus.',
+                      ),
+                      const SizedBox(height: 16),
+                      _infoCard(
+                        isDark, textColor, subColor,
+                        'The Story Behind It',
+                        'One of the purposes of designing this application stems from lessons learned from real challenges. '
+                        'When first arriving at Abdullah Gül University — skipping the preparatory year by passing the exemption exam — '
+                        'there was no chance to learn the campus the way 90% of students do through the prep program. '
+                        'Not knowing the buildings, processes, classroom arrangements, or campus structure was genuinely difficult.\n\n'
+                        'That experience is exactly where this idea came from. VRoute aims to give every newcomer — '
+                        'or even someone who hasn\'t arrived yet — meaningful, accurate information about the campus '
+                        'before they ever set foot on it.',
+                      ),
+                      const SizedBox(height: 16),
+                      _infoCard(
+                        isDark, textColor, subColor,
+                        'Looking Forward',
+                        'VRoute is highly open to improvement. With a full team and continued development, '
+                        'it could become a realistic marketing and navigation tool that fully meets the university\'s '
+                        'promotional needs. The goal is to present this to the university administration and continue '
+                        'growing it beyond the current phase.',
+                      ),
+                      const SizedBox(height: 24),
+                      _statsRow(isDark, textColor, subColor, accent),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
+    );
+  }
+
+  Widget _chip(String label, Color accent) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: accent.withValues(alpha: 0.12),
+      ),
+      child: Text(label, style: GoogleFonts.inter(
+        fontSize: 11, fontWeight: FontWeight.w500, color: accent,
+      )),
+    );
+  }
+
+  Widget _infoCard(bool isDark, Color textColor, Color subColor, String title, String body) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
-          color: Colors.white,
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0x1EFFFFFF) : const Color(0xCCFFFFFF),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? AppColors.darkGlassBorder : AppColors.lightGlassBorder,
+            ),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.asset(
-                'assets/about_vroute_image.png',
-                height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-              SizedBox(height: 16),
-              const Text(
-                'About VRoute',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              const Text(
-                'This app is designed to provide an interactive experience for university students and visitors. '
-                    'VRoute offers detailed information about the university, its facilities, and AR experiences to navigate '
-                    'and explore the campus more efficiently. With features like puzzles and interactive AR views, VRoute ensures '
-                    'that every user has a unique and enjoyable journey within the campus.',
-                style: TextStyle(fontSize: 16, height: 1.5),
-                textAlign: TextAlign.justify,
-              ),
-              SizedBox(height: 16),
-              const Text(
-                'One of the purposes of designing this application stems from the lessons I learned from my own challenges. When I came to Abdullah Gül University, I directly skipped the preparatory year by passing the exemption exam and started my department. Because of this, I didn\'t have the chance to get to know the university as thoroughly as the 90% of students who attend the preparatory program. Naturally, not knowing the campus, the buildings, or the way things work—like where things are located, how processes are carried out, the campus structure, and classroom arrangements—was very challenging for me.This is exactly where the idea of designing an application about the university comes from in my case. With this application, I aim to provide meaningful and valuable information about the university to everyone who has just arrived or is considering coming here. Even if they aren\'t physically at the university or haven\'t come yet, they will have access to detailed information and sufficient data about the campus.\n\n'
-                'Not only that, but I also see this application as highly open to improvement. If I were to work with a team instead of as an individual, I believe that in the future, this application could have an excellent user interface, become a realistic marketing tool, and fully meet the universitys promotional needs. I frequently reflect on this, and after completing this phase of the project, I am determined to continue working on this application and present it to the university administration. I sincerely hope that my enthusiasm and determination for this project will continue.',
-                style: TextStyle(fontSize: 16, height: 1.5),
-                textAlign: TextAlign.justify,
-              ),
+              Text(title, style: GoogleFonts.poppins(
+                fontSize: 15, fontWeight: FontWeight.w700, color: textColor,
+              )),
+              const SizedBox(height: 10),
+              Text(body, style: GoogleFonts.inter(
+                fontSize: 14, height: 1.75, color: textColor,
+              )),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _statsRow(bool isDark, Color textColor, Color subColor, Color accent) {
+    const stats = [
+      (Icons.school_rounded, '7', 'Faculties'),
+      (Icons.business_rounded, '7', 'Buildings'),
+      (Icons.people_rounded, '5K+', 'Students'),
+    ];
+
+    return Row(
+      children: stats.map((s) {
+        final isLast = s == stats.last;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: isLast ? 0 : 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0x1EFFFFFF) : const Color(0xCCFFFFFF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkGlassBorder : AppColors.lightGlassBorder,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(s.$1, color: accent, size: 20),
+                      const SizedBox(height: 6),
+                      Text(s.$2, style: GoogleFonts.poppins(
+                        fontSize: 18, fontWeight: FontWeight.w700, color: textColor,
+                      )),
+                      Text(s.$3, style: GoogleFonts.inter(fontSize: 11, color: subColor)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
