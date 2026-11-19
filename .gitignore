@@ -43,3 +43,5 @@ app.*.map.json
 # Google Services (keep these local only)
 google-services.json
 GoogleService-Info.plist
+
+CLAUDE.md
