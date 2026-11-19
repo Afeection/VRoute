@@ -14,11 +14,11 @@ class VRouteBottomNav extends StatelessWidget {
   final ValueChanged<int> onTap;
 
   static const _icons = [
-    (Icons.home_rounded,       'Home'),
-    (Icons.business_rounded,   'Facilities'),
-    (Icons.cloud_rounded,      'Weather'),
-    (Icons.chat_bubble_rounded,'Community'),
-    (Icons.settings_rounded,   'Settings'),
+    (Icons.home_rounded, 'Home'),
+    (Icons.business_rounded, 'Facilities'),
+    (Icons.cloud_rounded, 'Weather'),
+    (Icons.chat_bubble_rounded, 'Community'),
+    (Icons.settings_rounded, 'Settings'),
   ];
 
   @override
@@ -40,7 +40,9 @@ class VRouteBottomNav extends StatelessWidget {
               color: isDark ? const Color(0x1EFFFFFF) : const Color(0xCCFFFFFF),
               borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: isDark ? AppColors.darkGlassBorder : AppColors.lightGlassBorder,
+                color: isDark
+                    ? AppColors.darkGlassBorder
+                    : AppColors.lightGlassBorder,
                 width: 1.5,
               ),
               boxShadow: [
@@ -52,34 +54,42 @@ class VRouteBottomNav extends StatelessWidget {
               ],
             ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_icons.length, (i) {
                 final selected = i == currentIndex;
-                return GestureDetector(
-                  onTap: () => onTap(i),
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeInOut,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: selected ? accent.withValues(alpha: isDark ? 0.18 : 0.12) : Colors.transparent,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(_icons[i].$1, size: 22, color: selected ? accent : inactive),
-                        const SizedBox(height: 3),
-                        Text(
-                          _icons[i].$2,
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                            color: selected ? accent : inactive,
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => onTap(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeInOut,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 2, vertical: 7),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        color: selected
+                            ? accent.withValues(alpha: isDark ? 0.18 : 0.12)
+                            : Colors.transparent,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(_icons[i].$1,
+                              size: 22, color: selected ? accent : inactive),
+                          const SizedBox(height: 3),
+                          Text(
+                            _icons[i].$2,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight:
+                                  selected ? FontWeight.w600 : FontWeight.w400,
+                              color: selected ? accent : inactive,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
