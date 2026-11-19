@@ -1,10 +1,28 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:model_viewer_plus/model_viewer_plus.dart';
 import '../theme/app_colors.dart';
 
-class ARExperiencePage extends StatelessWidget {
+// Scene Viewer runs outside the app and can't read bundled assets,
+// so models are served over HTTPS from the repo via jsDelivr.
+const _modelBaseUrl = 'https://cdn.jsdelivr.net/gh/Afeection/VRoute@main/assets/models';
+
+const _models = [
+  ('Factory Hall', '$_modelBaseUrl/factory_hall.glb'),
+  ('Glass Tower', '$_modelBaseUrl/glass_tower.glb'),
+  ('Lab Block', '$_modelBaseUrl/lab_block.glb'),
+];
+
+class ARExperiencePage extends StatefulWidget {
   const ARExperiencePage({super.key});
+
+  @override
+  State<ARExperiencePage> createState() => _ARExperiencePageState();
+}
+
+class _ARExperiencePageState extends State<ARExperiencePage> {
+  int _selected = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +75,11 @@ class ARExperiencePage extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
                     child: Column(
                       children: [
-                        _cameraViewport(isDark, subColor, accent),
-                        const SizedBox(height: 28),
-                        _comingSoonCard(isDark, textColor, subColor, accent),
+                        _modelViewport(isDark, accent),
+                        const SizedBox(height: 14),
+                        _modelSelector(isDark, textColor, accent),
+                        const SizedBox(height: 20),
+                        _arHintCard(isDark, textColor, subColor, accent),
                         const SizedBox(height: 20),
                         _featureGrid(isDark, textColor, subColor, accent),
                       ],
@@ -74,79 +94,82 @@ class ARExperiencePage extends StatelessWidget {
     );
   }
 
-  Widget _cameraViewport(bool isDark, Color subColor, Color accent) {
+  Widget _modelViewport(bool isDark, Color accent) {
+    final model = _models[_selected];
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-        child: Container(
-          height: 260,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: isDark
-                  ? [const Color(0xFF1A2A6C).withValues(alpha: 0.5), const Color(0xFF0A1A3C).withValues(alpha: 0.5)]
-                  : [const Color(0xFF4ECBA8).withValues(alpha: 0.1), const Color(0xFF6B9AFF).withValues(alpha: 0.1)],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: isDark ? AppColors.darkGlassBorder : AppColors.lightGlassBorder,
-              width: 1.5,
-            ),
+      child: Container(
+        height: 320,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [const Color(0xFF1A2A6C).withValues(alpha: 0.5), const Color(0xFF0A1A3C).withValues(alpha: 0.5)]
+                : [const Color(0xFF4ECBA8).withValues(alpha: 0.1), const Color(0xFF6B9AFF).withValues(alpha: 0.1)],
           ),
-          child: Stack(
-            children: [
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 80, height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: AppColors.tealGradient,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.teal.withValues(alpha: 0.35),
-                            blurRadius: 24,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.view_in_ar_rounded, color: Colors.white, size: 36),
-                    ),
-                    const SizedBox(height: 16),
-                    Text('Point & Explore', style: GoogleFonts.poppins(
-                      fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white,
-                    )),
-                    const SizedBox(height: 4),
-                    Text('AR camera view will appear here', style: GoogleFonts.inter(
-                      fontSize: 12, color: subColor,
-                    )),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 16, left: 16,
-                child: _cornerBracket(accent, true, true),
-              ),
-              Positioned(
-                top: 16, right: 16,
-                child: _cornerBracket(accent, true, false),
-              ),
-              Positioned(
-                bottom: 16, left: 16,
-                child: _cornerBracket(accent, false, true),
-              ),
-              Positioned(
-                bottom: 16, right: 16,
-                child: _cornerBracket(accent, false, false),
-              ),
-            ],
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isDark ? AppColors.darkGlassBorder : AppColors.lightGlassBorder,
+            width: 1.5,
           ),
         ),
+        child: Stack(
+          children: [
+            // Keyed so switching buildings rebuilds the WebView with the new src.
+            ModelViewer(
+              key: ValueKey(model.$2),
+              src: model.$2,
+              alt: model.$1,
+              ar: true,
+              arModes: const ['scene-viewer', 'webxr', 'quick-look'],
+              autoRotate: true,
+              cameraControls: true,
+              backgroundColor: Colors.transparent,
+            ),
+            Positioned(top: 16, left: 16, child: _cornerBracket(accent, true, true)),
+            Positioned(top: 16, right: 16, child: _cornerBracket(accent, true, false)),
+            Positioned(bottom: 16, left: 16, child: _cornerBracket(accent, false, true)),
+            Positioned(bottom: 16, right: 16, child: _cornerBracket(accent, false, false)),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _modelSelector(bool isDark, Color textColor, Color accent) {
+    return Row(
+      children: [
+        for (var i = 0; i < _models.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selected = i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: i == _selected
+                      ? accent.withValues(alpha: 0.2)
+                      : (isDark ? const Color(0x1EFFFFFF) : const Color(0xCCFFFFFF)),
+                  border: Border.all(
+                    color: i == _selected
+                        ? accent
+                        : (isDark ? AppColors.darkGlassBorder : AppColors.lightGlassBorder),
+                  ),
+                ),
+                child: Text(_models[i].$1, style: GoogleFonts.inter(
+                  fontSize: 12,
+                  fontWeight: i == _selected ? FontWeight.w600 : FontWeight.w500,
+                  color: i == _selected ? accent : textColor,
+                )),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -157,7 +180,7 @@ class ARExperiencePage extends StatelessWidget {
     );
   }
 
-  Widget _comingSoonCard(bool isDark, Color textColor, Color subColor, Color accent) {
+  Widget _arHintCard(bool isDark, Color textColor, Color subColor, Color accent) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -179,18 +202,18 @@ class ARExperiencePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                   color: accent.withValues(alpha: 0.15),
                 ),
-                child: Icon(Icons.construction_rounded, color: accent, size: 22),
+                child: Icon(Icons.view_in_ar_rounded, color: accent, size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Coming Soon', style: GoogleFonts.poppins(
+                    Text('Place it in your space', style: GoogleFonts.poppins(
                       fontSize: 15, fontWeight: FontWeight.w700, color: textColor,
                     )),
                     const SizedBox(height: 2),
-                    Text('AR features are under active development', style: GoogleFonts.inter(
+                    Text('Tap the AR button on the model to view it through your camera', style: GoogleFonts.inter(
                       fontSize: 12, color: subColor,
                     )),
                   ],
